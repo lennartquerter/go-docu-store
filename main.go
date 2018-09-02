@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"github.com/gorilla/mux"
 	"os"
+	"path/filepath"
 )
 
 const storagePath = "./storage"
@@ -17,13 +18,13 @@ func main() {
 		os.MkdirAll(storagePath, os.ModePerm)
 	}
 
-	if _, err := os.Stat(staticPath); os.IsNotExist(err) {
-		os.MkdirAll(staticPath, os.ModePerm)
+	if _, err := os.Stat(filepath.Join(storagePath, staticPath)); os.IsNotExist(err) {
+		os.MkdirAll(filepath.Join(storagePath, staticPath), os.ModePerm)
 	}
 
 	router := mux.NewRouter()
 
-	router.PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(http.Dir(staticPath))))
+	router.PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(http.Dir(filepath.Join(storagePath, staticPath)))))
 
 	router.HandleFunc("/{storage}", CreateDocument).Methods("POST")
 	router.HandleFunc("/{storage}/{id}", GetDocument).Methods("GET")
