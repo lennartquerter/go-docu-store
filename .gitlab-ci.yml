@@ -1,0 +1,79 @@
+## Kubernetes Config for Gitlab Ci
+## Author: Lennart Querter
+## Email: lennart.querter@gmail.com
+
+stages:
+- build-image
+- deploy-test
+- build-tagged-image
+- deploy-production
+
+variables:
+  K8S_PULL_SECRET: "regcred"
+  K8S_NAMESPACE: "lenimal-$K8S_ENV"
+  REPLICAS: 1
+
+  IMAGE: 'git.lenimal.nl:5001/lenimal-applications/len-image-server'
+  IMAGE_ESCAPED: 'git.lenimal.nl:5001\/lenimal-applications\/len-image-server'
+  IMAGE_NAME: "image-server-01"
+
+
+  CONTAINER_PATH: '\/storage'
+  HOST_PATH: "\\/mnt\\/disks\\/lenimal-$K8S_ENV\\/image-server"
+
+  TARGET_PORT: 8150 # Exposed Port
+  PORT: 8150 # Application Port
+
+  ACC_URL: "https://image-test.lenimal.nl/booking"
+  PROD_URL: "https://image.lenimal.nl/booking"
+
+
+Build Docker Image:
+  stage: build-image
+  only:
+  - master@lenimal-applications/len-image-server
+  script:
+  - docker build -t $IMAGE:$CI_COMMIT_SHA .
+  - docker login $REGISTRY_URL -u $REGISTRY_LOGIN -p $REGISTRY_PASSWORD
+  - docker push $IMAGE:$CI_COMMIT_SHA
+
+Deploy K8S Test:
+  stage: deploy-test
+  only:
+  - master@lenimal-applications/len-image-server
+  variables:
+    ENV_NAME: 'Acceptance'
+    K8S_ENV: "acc"
+  environment:
+    name: Acceptance
+    url: $ACC_URL
+  script:
+  - sed 's/_IMAGE_NAME_/'"$IMAGE_NAME"'/g; s/_CONTAINER_PATH_/'"$CONTAINER_PATH"'/g; s/_HOST_PATH_/'"$HOST_PATH"'/g; s/_VERSION_/'"$CI_COMMIT_SHA"'/g; s/_IMAGE_/'"$IMAGE_ESCAPED"'/g; s/_K8S_NAMESPACE_/'"$K8S_NAMESPACE"'/g; s/_ENV_/'"$ENV_NAME"'/g; s/_TARGET_PORT_/'"$TARGET_PORT"'/g; s/_PORT_/'"$PORT"'/g; s/_K8S_PULL_SECRET_/'"$K8S_PULL_SECRET"'/g; s/_REPLICAS_/'"$REPLICAS"'/g;' kubernetes.tpl.yml > kubernetes.yml
+  - cat kubernetes.yml
+  - kubectl apply -f kubernetes.yml
+
+
+Build Tagged Docker Image:
+  stage: build-tagged-image
+  only:
+  - tags@lenimal-applications/len-image-server
+  script:
+  - docker build -t $IMAGE:$CI_COMMIT_TAG .
+  - docker login $REGISTRY_URL -u $REGISTRY_LOGIN -p $REGISTRY_PASSWORD
+  - docker push $IMAGE:$CI_COMMIT_TAG
+
+Deploy K8S Production:
+  stage: deploy-production
+  only:
+  - tags@lenimal-applications/len-image-server
+  when: manual
+  variables:
+    ENV_NAME: 'Production'
+    K8S_ENV: "prod"
+  environment:
+    name: Production
+    url: $PROD_URL
+  script:
+  - sed 's/_IMAGE_NAME_/'"$IMAGE_NAME"'/g; s/_CONTAINER_PATH_/'"$CONTAINER_PATH"'/g; s/_HOST_PATH_/'"$HOST_PATH"'/g; s/_VERSION_/'"$CI_COMMIT_TAG"'/g; s/_IMAGE_/'"$IMAGE_ESCAPED"'/g; s/_K8S_NAMESPACE_/'"$K8S_NAMESPACE"'/g; s/_ENV_/'"$ENV_NAME"'/g; s/_TARGET_PORT_/'"$TARGET_PORT"'/g; s/_PORT_/'"$PORT"'/g; s/_K8S_PULL_SECRET_/'"$K8S_PULL_SECRET"'/g; s/_REPLICAS_/'"$REPLICAS"'/g;' kubernetes.tpl.yml > kubernetes.yml
+  - cat kubernetes.yml
+  - kubectl apply -f kubernetes.yml
