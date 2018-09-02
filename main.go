@@ -26,9 +26,10 @@ func main() {
 
 	router.PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(http.Dir(filepath.Join(storagePath, staticPath)))))
 
-	router.HandleFunc("/{storage}", CreateDocument).Methods("POST")
-	router.HandleFunc("/{storage}/{id}", GetDocument).Methods("GET")
-	router.HandleFunc("/static/{client}/{folder}", CreateStaticFile).Methods("POST")
+	router.HandleFunc("{storage}/{id}", GetDocument).Methods("GET")
+
+	router.HandleFunc("/api/v1/{storage}", CreateDocument).Methods("POST")
+	router.HandleFunc("/api/v1/static/{client}/{folder}", CreateStaticFile).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8150", router))
 }

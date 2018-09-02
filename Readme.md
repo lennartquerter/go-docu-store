@@ -5,12 +5,12 @@ Simple api to save and retrieve images.
 
 ## Create Images
 
-POST `/{storage}`
+POST `/api/v1/{storage}`
 
 Creates a folder in ./storage and returns the document Id as a Guid.
 
 
-POST `/static/{client}/{folder}`
+POST `/api/v1/static/{client}/{folder}`
 
 Created a folder in ./static/{client}/{folder} that can be served as static content. Returns the image path
 
