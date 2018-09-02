@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: _IMAGE_NAME_
+  namespace: _K8S_NAMESPACE_
+  labels:
+    app: _IMAGE_NAME_
+spec:
+  replicas: _REPLICAS_
+  template:
+    metadata:
+      name: _IMAGE_NAME_
+      labels:
+        app: _IMAGE_NAME_
+    spec:
+      imagePullSecrets:
+      - name: _K8S_PULL_SECRET_
+      containers:
+      - name: _IMAGE_NAME_
+        image: _IMAGE_:_VERSION_
+        imagePullPolicy: Always
+        env:
+        - name: POSTGRES_PASSWORD
+          value: _POSTGRES_PASSWORD_
+        ports:
+        - containerPort: _PORT_
+        volumeMounts:
+        - name: storage
+          mountPath: _CONTAINER_PATH_
+      volumes:
+      - name: storage
+        hostPath:
+          path: _HOST_PATH_
+      nodeSelector:
+        database: enabled
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: _IMAGE_NAME_
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: _IMAGE_NAME_
+  namespace: _K8S_NAMESPACE_
+spec:
+  type: NodePort
+  ports:
+  - port: _PORT_
+    targetPort: _TARGET_PORT_
+    name: _IMAGE_NAME_-http
+    nodePort: 31514
+    protocol: TCP
+  selector:
+    app: _IMAGE_NAME_
