@@ -38,7 +38,7 @@ func CreateStaticFile(w http.ResponseWriter, r *http.Request) {
 
 	imagePath := filepath.Join(path, fileName+extension)
 
-	out, err := os.OpenFile(imagePath, os.O_WRONLY|os.O_CREATE, 0666)
+	out, err := os.OpenFile(filepath.Join(storagePath, imagePath), os.O_WRONLY|os.O_CREATE, 0666)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
