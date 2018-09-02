@@ -10,7 +10,7 @@ POST `/{storage}`
 Creates a folder in ./storage and returns the document Id as a Guid.
 
 
-POST `/{client}/{folder}`
+POST `/static/{client}/{folder}`
 
 Created a folder in ./static/{client}/{folder} that can be served as static content. Returns the image path
 

@@ -27,7 +27,7 @@ func main() {
 
 	router.HandleFunc("/{storage}", CreateDocument).Methods("POST")
 	router.HandleFunc("/{storage}/{id}", GetDocument).Methods("GET")
-	router.HandleFunc("/{client}/{folder}", CreateStaticFile).Methods("POST")
+	router.HandleFunc("/static/{client}/{folder}", CreateStaticFile).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8150", router))
 }
