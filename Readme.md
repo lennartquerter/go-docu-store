@@ -26,8 +26,15 @@ You can also get images in the static folder by
 GET `/static/{path}`
 
 
+## Todo
+
+1) Image compression
+2) retrieve resized images
+3) Save thumbnails
+
 
 ## Dependencies
 
 1) github.com/gorilla/mux
 2) github.com/gofrs/uuid
+
