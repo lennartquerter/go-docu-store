@@ -16,3 +16,5 @@
 static
 storage
 ImageProvider
+kubernetes.tpl.yml
+.gitlab-ci.yml
