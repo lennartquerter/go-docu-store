@@ -32,7 +32,7 @@ spec:
         hostPath:
           path: _HOST_PATH_
       nodeSelector:
-        database: enabled
+        image: enabled
       restartPolicy: Always
   selector:
     matchLabels:
@@ -44,12 +44,10 @@ metadata:
   name: _IMAGE_NAME_
   namespace: _K8S_NAMESPACE_
 spec:
-  type: NodePort
   ports:
   - port: _PORT_
     targetPort: _TARGET_PORT_
     name: _IMAGE_NAME_-http
-    nodePort: 31514
     protocol: TCP
   selector:
     app: _IMAGE_NAME_
